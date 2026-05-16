@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+import pandas as pd
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -143,30 +144,36 @@ class Processor:
             logger.critical(f'Database Error: {op_error}')
                 
     def _format_time_series_data(self, unformatted_table_rows):
-        return [
-            {
-                'symbol': row[0],
-                'interval': row[1],
-                'datetime':row[2],
-                'open': row[3],
-                'high': row[4],
-                'low': row[5],
-                'close': row[6],
-                'volume': row[7] 
-            }
-            for row in unformatted_table_rows
-        ]
+        df =  pd.DataFrame( # Initializtion of a pandas data frame
+            unformatted_table_rows,
+            columns=[
+                'symbol',
+                'interval',
+                'datetime',
+                'open',
+                'high',
+                'low',
+                'close',
+                'volume'
+                ]
+            )
+        df['datetime'] = pd.to_datetime(df['datetime']) # Converts string into pandas 64 pit num
+        df.set_index('datetime') # Sets datetime column values as indexes for data frame
+        return df
     
     def _format_commodity_data(self, unformatted_table_rows):
-        return [
-            {
-                'interval': row[0],
-                'commodity_type': row[1],
-                'date': row[2],
-                'price': row[3],                
-            }
-            for row in unformatted_table_rows
-        ]
+        df = pd.DataFrame(
+            unformatted_table_rows,
+            columns=[
+                'interval',
+                'commodity_type',
+                'date',
+                'price'
+            ]
+        )
+        df['date'] = pd.to_datetime(df['date'])
+        df.set_index('date')
+        return df
     
     def _format_last_updated_data(self, dates_tuple):
         return {

@@ -216,3 +216,6 @@ test_12d_crypto_data.json
 
 # SQLite3 Database
 financial_data.db
+
+# Settings.json folder
+/.vscode

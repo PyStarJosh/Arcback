@@ -1,4 +1,3 @@
-
 import logging
 from .processor import Processor
 from .loader import Loader

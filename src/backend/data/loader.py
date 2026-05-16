@@ -110,7 +110,7 @@ class Loader:
             
             for key in self.API_ERROR_RESPONSES:
                 if key in data_json:
-                    raise ValueError(data_json[key]) # Passes Alpha Vantage message to ValueError except block
+                    raise ValueError(data_json[key]) # Passes API error message to ValueError except block
             
             return data_json
         
