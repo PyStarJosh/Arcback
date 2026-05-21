@@ -1,5 +1,3 @@
-
-
 class Sizing:
     '''Determines the position sizing'''
     
