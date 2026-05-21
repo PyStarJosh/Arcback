@@ -10,17 +10,17 @@ class Position:
     tp: float # take-profit price
 
 @dataclass()
-class ExitSignal():
+class ExitSignal:
     price: float # trade exit price
     reason: str # "stop_loss" or "take_profit"
     
 class Exits:
     '''Runs configured exit rules each bar; first match wins.'''
     
-    def check(self, bars: pd.DataFrame, pos: Position) -> Optional[ExitSignal]:
+    def check(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
         '''Checks if position's take profit or stop loss was crossed/met'''
-        high = bars['high']
-        low = bars['low']
+        high = bar['high']
+        low = bar['low']
         
         if pos.side == 1:
             if high >= pos.tp:
@@ -33,6 +33,4 @@ class Exits:
             elif low <= pos.tp:
                 return ExitSignal(pos.tp, 'take_profit')
         
-        return None
-    
-    
+        return None   
