@@ -144,7 +144,7 @@ class Processor:
             logger.critical(f'Database Error: {op_error}')
                 
     def _format_time_series_data(self, unformatted_table_rows):
-        df =  pd.DataFrame( # Initializtion of a pandas data frame
+        tseries_df =  pd.DataFrame( # Initializtion of a pandas data frame
             unformatted_table_rows,
             columns=[
                 'symbol',
@@ -157,12 +157,12 @@ class Processor:
                 'volume'
                 ]
             )
-        df['datetime'] = pd.to_datetime(df['datetime']) # Converts string into pandas 64 pit num
-        df.set_index('datetime') # Sets datetime column values as indexes for data frame
-        return df
+        tseries_df['datetime'] = pd.to_datetime(tseries_df['datetime']) # Converts string into pandas 64 pit num
+        tseries_df.set_index('datetime') # Sets datetime column values as indexes for data frame
+        return tseries_df
     
     def _format_commodity_data(self, unformatted_table_rows):
-        df = pd.DataFrame(
+        commodity_df = pd.DataFrame(
             unformatted_table_rows,
             columns=[
                 'interval',
@@ -171,9 +171,9 @@ class Processor:
                 'price'
             ]
         )
-        df['date'] = pd.to_datetime(df['date'])
-        df.set_index('date')
-        return df
+        commodity_df['date'] = pd.to_datetime(commodity_df['date'])
+        commodity_df.set_index('date')
+        return commodity_df
     
     def _format_last_updated_data(self, dates_tuple):
         return {

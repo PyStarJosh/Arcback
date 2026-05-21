@@ -26,5 +26,5 @@ class Algorithms:
         # Result signal column population
         result.loc[buy_crossing, "signal"] = 1
         result.loc[sell_crossing, "signal"] = -1
-
+         
         return result
