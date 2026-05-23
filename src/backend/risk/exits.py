@@ -17,8 +17,8 @@ class ExitSignal:
 class Exits:
     '''Runs configured exit rules each bar; first match wins.'''
     
-    def check(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
-        '''Checks if position's take profit or stop loss was crossed/met'''
+    def check_tseries_trade(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
+        '''Checks if time series position's take profit or stop loss was crossed/met'''
         high = bar['high']
         low = bar['low']
         
@@ -33,4 +33,21 @@ class Exits:
             elif low <= pos.tp:
                 return ExitSignal(pos.tp, 'take_profit')
         
-        return None   
+        return None
+    
+    def check_commodity_trade(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
+        '''Checks if commodity position's take profit or stop loss was crossed/met'''
+        price = bar['price']
+        
+        if pos.side == 1:
+            if price >= pos.tp:
+                return ExitSignal(pos.tp, 'take_profit')
+            elif price <= pos.sl:
+                return ExitSignal(pos.sl, 'stop_loss')
+        else: 
+            if price >= pos.sl:
+                return ExitSignal(pos.sl, 'stop_loss')
+            elif price <= pos.tp:
+                return ExitSignal(pos.tp, 'take_profit')
+        
+        return None        
