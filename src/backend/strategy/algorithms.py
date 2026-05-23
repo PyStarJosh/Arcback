@@ -8,14 +8,14 @@ class Algorithms:
     def __init__(self):
         self.indicators = Indicators()
 
-    def ma_crossover(self, df: pd.DataFrame, short_period: int, long_period: int) -> pd.DataFrame:
-        # creates a copy of passed DataFrame data structure and creates 3 columns
-        # 2 columns hold the returned series from the ma indicators and the last one hold the
-        # buy or sell signals that will be used by engine.py
-        result = df.copy()
-        result["ema_short"] = self.indicators.ema(result["closes"], short_period)
-        result["sma_long"] = self.indicators.sma(result["closes"], long_period)
-        result["signal"] = 0  # init pandas series with default values of 0
+    def ma_crossover(self, price_data: pd.Series, dt_series: pd.Series, short_period: int, long_period: int) -> pd.DataFrame:
+        result = pd.DataFrame(
+            {
+                'ema_short': self.indicators.ema(price_data, short_period),
+                'sma_long': self.indicators.sma(price_data, long_period),
+                'signal': 0,
+            }, index=dt_series
+        )
         ema_short, sma_long = result["ema_short"], result["sma_long"]
 
         # Provides boolean values that are used for buy or sell signals
