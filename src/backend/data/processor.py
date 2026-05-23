@@ -158,7 +158,7 @@ class Processor:
                 ]
             )
         tseries_df['datetime'] = pd.to_datetime(tseries_df['datetime']) # Converts string into pandas 64 pit num
-        tseries_df.set_index('datetime') # Sets datetime column values as indexes for data frame
+        tseries_df = tseries_df.set_index('datetime') # Sets datetime column values as indexes for data frame
         return tseries_df
     
     def _format_commodity_data(self, unformatted_table_rows):
@@ -172,7 +172,7 @@ class Processor:
             ]
         )
         commodity_df['date'] = pd.to_datetime(commodity_df['date'])
-        commodity_df.set_index('date')
+        commodity_df = commodity_df.set_index('date',)
         return commodity_df
     
     def _format_last_updated_data(self, dates_tuple):
