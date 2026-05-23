@@ -1,4 +1,3 @@
-import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -15,7 +14,3 @@ class Positons:
     status: str = 'open'
     side: str # 'long' or 'short'
     quantity: float
-    
-    def __post_init__(self) -> None:
-        if self.side not in ('long', 'short'):
-            raise ValueError(f'position side must be "long" or "short", got', {self.side})
