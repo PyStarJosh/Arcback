@@ -12,10 +12,10 @@ class Exits:
     '''Runs configured exit rules each bar; first match wins.'''
 
     @staticmethod 
-    def check_tseries_trade(price_df: pd.Series, pos: Positions) -> Optional[ExitSignal]:
+    def check_tseries_trade(price: pd.Series, pos: Positions) -> Optional[ExitSignal]:
         '''Checks if time series position's take profit or stop loss was crossed/met'''
-        high = price_df['high']
-        low = price_df['low']
+        high = price['high']
+        low = price['low']
         
         if pos.side == 1:
             if high >= pos.tp:
@@ -31,9 +31,9 @@ class Exits:
         return None
     
     @staticmethod
-    def check_commodity_trade(price_df: pd.Series, pos: Positions) -> Optional[ExitSignal]:
+    def check_commodity_trade(date_price: pd.Series, pos: Positions) -> Optional[ExitSignal]:
         '''Checks if commodity position's take profit or stop loss was crossed/met'''
-        price = price_df['price']
+        price = date_price['price']
     
         if pos.side == 1:
             if price >= pos.tp:
