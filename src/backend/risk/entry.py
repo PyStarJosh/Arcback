@@ -6,7 +6,7 @@ class Entry:
     
     @staticmethod
     def check_entry(timestamp: pd.DatetimeIndex, entry_indicator: pd.DataFrame) -> bool:
-        return entry_indicator.at[timestamp, 'signal'] == 1
+        return entry_indicator.at[timestamp, 'signal']
     
     @staticmethod
     def set_tp(side: int, entry_price: float, atr: float, multiplier: float) -> float:

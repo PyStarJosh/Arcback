@@ -7,7 +7,7 @@ class Portfolio:
         if equity <= 0:
             raise ValueError('The balance must be greater than $0')
         self.equity = equity
-        self.portfolio = pd.DataFrame(
+        self.equity_df = pd.DataFrame(
             {
                 'price': self.equity,
             }, index= dt_index
