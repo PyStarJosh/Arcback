@@ -13,7 +13,7 @@ class Portfolio:
             }, index= dt_index
         )
     
-    def adjust_qruity(self, amount: float) -> float:
+    def adjust_equity(self, amount: float) -> float:
         '''adjusts the portfolio's balance based on passed float amount'''
         self.equity += amount
         return self.equity

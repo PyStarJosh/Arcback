@@ -1,7 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional
-from ..engine import Positons
+from ..engine import Positions
 
 @dataclass()
 class ExitSignal:
@@ -11,8 +11,8 @@ class ExitSignal:
 class Exits:
     '''Runs configured exit rules each bar; first match wins.'''
 
-        
-    def check_tseries_trade(self, price_df: pd.Series, pos: Positons) -> Optional[ExitSignal]:
+    @staticmethod 
+    def check_tseries_trade(price_df: pd.Series, pos: Positions) -> Optional[ExitSignal]:
         '''Checks if time series position's take profit or stop loss was crossed/met'''
         high = price_df['high']
         low = price_df['low']
@@ -30,7 +30,8 @@ class Exits:
         
         return None
     
-    def check_commodity_trade(self, price_df: pd.Series, pos: Positons) -> Optional[ExitSignal]:
+    @staticmethod
+    def check_commodity_trade(price_df: pd.Series, pos: Positions) -> Optional[ExitSignal]:
         '''Checks if commodity position's take profit or stop loss was crossed/met'''
         price = price_df['price']
     
