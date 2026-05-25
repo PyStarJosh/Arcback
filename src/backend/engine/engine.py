@@ -28,27 +28,19 @@ class Engine:
             signal = Entry.check_entry(timestamp, signal_df)
             
             if signal != 0:
-                shares = Sizing.volatility_targeted_sizing(risk_pct, self.portfolio.equity, atr_multiplier, atr)
-                
-                pos = Positions(
-                    entry_time=price_row.name,
-                    entry_price=price_row['close'],
-                    symbol=price_row['symbol'],
-                    side=signal,
-                    quantity=shares,
-                    tp=Entry.set_tp(signal, price_row['close'], atr, atr_multiplier),
-                    sl=Entry.set_sl(signal, price_row['close'], atr, atr_multiplier),
-                    exit_time=None,
-                    exit_price=None,
-                    pnl=None,
-                    exit_reason=None,
-                    status='open',
-                )
-                self._pos_records.append(vars(pos))
+                if self.asset_type == 'tseries':
+                    self._open_position(risk_pct, price_row, signal, atr, atr_multiplier, symbol_column_name='symbol',price_column_name='close')
+                else:
+                    self._open_position(risk_pct, price_row, signal, atr, atr_multiplier, symbol_column_name='commodity_type',price_column_name='price')
+
 
             for record in self._pos_records:
                 if record['status'] == 'open':
-                    exit_signal = Exits.check_tseries_trade(price_row, record)
+                    if self.asset_type == 'tseries':
+                        exit_signal = Exits.check_tseries_trade(price_row, record)
+                    else: 
+                        exit_signal = Exits.check_commodity_trade(price_row, record)
+                        
                     if exit_signal:
                         record['exit_time'] = timestamp
                         record['exit_price'] = exit_signal.price
@@ -62,4 +54,22 @@ class Engine:
                         self.portfolio.equity_df.at[timestamp, 'price'] = new_equity
 
         self.pos_df = pd.DataFrame(self._pos_records)
-                        
+        return self.pos_df, self.portfolio
+        
+    def _open_position(self, risk_pct: float, data: pd.Series, signal: int, price_column_name: str, symbol_column_name: str, atr: int, atr_multiplier: int) -> None:
+        shares = Sizing.volatility_targeted_sizing(risk_pct, self.portfolio.equity, atr_multiplier, atr)
+        pos = Positions(
+                    entry_time=data.name,
+                    entry_price=data[price_column_name],
+                    symbol=data[symbol_column_name],
+                    side=signal,
+                    quantity=shares,
+                    tp=Entry.set_tp(signal, data[price_column_name], atr, atr_multiplier),
+                    sl=Entry.set_sl(signal, data[price_column_name], atr, atr_multiplier),
+                    exit_time=None,
+                    exit_price=None,
+                    pnl=None,
+                    exit_reason=None,
+                    status='open',
+                )
+        self._pos_records.append(vars(pos))

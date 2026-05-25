@@ -1,7 +1,6 @@
 import pandas as pd
 from .indicators import Indicators
 
-
 class Algorithms:
     """Startegy Implementation"""
     

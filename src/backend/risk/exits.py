@@ -1,7 +1,6 @@
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional
-from ..engine import Positions
 
 @dataclass()
 class ExitSignal:
@@ -44,4 +43,5 @@ class Exits:
                 return ExitSignal(pos['sl'], 'stop_loss')
             elif price <= pos['tp']:
                 return ExitSignal(pos['tp'], 'take_profit')
-        
+            
+        return None
