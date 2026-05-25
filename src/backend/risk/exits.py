@@ -1,7 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional
-from ..engine.positions import Positons
+from ..engine import Positons
 
 @dataclass()
 class ExitSignal:

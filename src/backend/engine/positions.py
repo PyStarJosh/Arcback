@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 @dataclass
-class Positons:
+class Positions:
     '''Handles all open positions and their operations during backtest'''
     entry_time: datetime
     exit_time: datetime | None = None
