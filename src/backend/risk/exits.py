@@ -1,13 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass
 from typing import Optional
-
-@dataclass()
-class Position:
-    entry_price: float
-    side: int # +1 long, -1 short
-    sl: float # stop-loss price
-    tp: float # take-profit price
+from ..engine.positions import Positons
 
 @dataclass()
 class ExitSignal:
@@ -16,11 +10,12 @@ class ExitSignal:
     
 class Exits:
     '''Runs configured exit rules each bar; first match wins.'''
-    
-    def check_tseries_trade(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
+
+        
+    def check_tseries_trade(self, price_df: pd.Series, pos: Positons) -> Optional[ExitSignal]:
         '''Checks if time series position's take profit or stop loss was crossed/met'''
-        high = bar['high']
-        low = bar['low']
+        high = price_df['high']
+        low = price_df['low']
         
         if pos.side == 1:
             if high >= pos.tp:
@@ -35,10 +30,10 @@ class Exits:
         
         return None
     
-    def check_commodity_trade(self, bar: pd.Series, pos: Position) -> Optional[ExitSignal]:
+    def check_commodity_trade(self, price_df: pd.Series, pos: Positons) -> Optional[ExitSignal]:
         '''Checks if commodity position's take profit or stop loss was crossed/met'''
-        price = bar['price']
-        
+        price = price_df['price']
+    
         if pos.side == 1:
             if price >= pos.tp:
                 return ExitSignal(pos.tp, 'take_profit')

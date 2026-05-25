@@ -12,5 +12,7 @@ class Positons:
     symbol: str
     reason: str | None = None
     status: str = 'open'
-    side: str # 'long' or 'short'
+    side: int # 'long' = 1 or 'short' = -1
     quantity: float
+    tp: float
+    sl: float
