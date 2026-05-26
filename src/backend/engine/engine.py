@@ -1,7 +1,6 @@
 import pandas as pd
 from ..risk import Exits, Entry, Sizing
 from ..portfolio import Portfolio
-from ..strategy import Algorithms, Indicators
 from ..data import DataManager
 from .positions import Positions
 
@@ -54,7 +53,7 @@ class Engine:
                         self.portfolio.equity_df.at[timestamp, 'price'] = new_equity
 
         self.pos_df = pd.DataFrame(self._pos_records)
-        return self.pos_df, self.portfolio
+        return self.pos_df, self.portfolio.equity_df
         
     def _open_position(self, risk_pct: float, data: pd.Series, signal: int, price_column_name: str, symbol_column_name: str, atr: int, atr_multiplier: int) -> None:
         shares = Sizing.volatility_targeted_sizing(risk_pct, self.portfolio.equity, atr_multiplier, atr)
