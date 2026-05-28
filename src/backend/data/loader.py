@@ -104,15 +104,15 @@ class Loader:
         try:
             r = requests.get(url, timeout=5)  # Makes HTTP request to APi with a timeout of 5 seconds
             r.raise_for_status()
-            data_json = r.json()
-            if not data_json:
+            data = r.json()
+            if not data:
                 raise ValueError('API returned empty response')
             
             for key in self.API_ERROR_RESPONSES:
-                if key in data_json:
-                    raise ValueError(data_json[key]) # Passes API error message to ValueError except block
+                if key in data:
+                    raise ValueError(data[key]) # Passes API error message to ValueError except block
             
-            return data_json
+            return data
         
         except (requests.exceptions.ConnectionError) as http_connection_error:  # Most common error, catches HTTP connection errors
             logger.critical(f"HTTP Connection Error: {http_connection_error}")
