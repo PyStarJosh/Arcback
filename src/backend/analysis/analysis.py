@@ -1,3 +1,6 @@
+"""Takes the passed positions and equity dataframes to compute results and return
+meaningful data to the frontend
+"""
 import pandas as pd
 from dataclasses import dataclass
 
@@ -14,7 +17,7 @@ class Analysis:
         return round(self.final_equity_df['price'].min(), 2)
     
     def highest_equity(self) -> float:
-        return round(self.final_equity_df['price'].max(), 2)
+        return round(self.final_equity_df['price'].max(), 2) 
     
     def gross_revenue(self) -> float:
         return round(self.final_pos_df[self.final_pos_df['pnl'] > 0]['pnl'].sum(), 2)
