@@ -62,6 +62,7 @@ class Processor:
             
         except sqlite3.OperationalError as op_error:
             logger.critical(f"Database Error: {op_error}")
+            raise
     
     def populate_commodities_prices_table(self, commodities_data_dict, interval, commodity_type):
         try:
@@ -80,6 +81,7 @@ class Processor:
         
         except sqlite3.OperationalError as op_error:
             logger.critical(f'Database Error: {op_error}')
+            raise
         
     # DATA GETTER METHODS
     
