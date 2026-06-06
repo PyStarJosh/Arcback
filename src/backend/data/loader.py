@@ -62,22 +62,12 @@ class Loader:
         self.__TWELVEDATA_API_KEY = Constants.get_twelvedata_api_key()
         
     # Provides dict of all Twelve Data supported symbols
-    def get_supported_symbols(self, asset_type):
-        if asset_type.lower() not in self.TWELVEDATA_ASSET_TYPES:
-            raise ValueError(
-                f'Unsupported Asset Type: Twelve Data does not support {asset_type.lower()}'
-            )
-        
+    def get_supported_symbols(self, asset_type):        
         url = f'''{self.TWELVEDATA_BASE_URL}{asset_type.lower()}?apikey={self.__TWELVEDATA_API_KEY}'''
         return self._call_api(url)
     
     # Returns a python onject of stock, forex, silver, gold, or crypto data
-    def get_time_series_data(self, symbol, interval, start_date=None, end_date=None):
-        if interval.lower() not in self.TWELVEDATA_INTERVALS:
-            raise ValueError(
-                f'Unsupported Interval: {interval.lower()} is not supported for {symbol.upper()}'
-            )
-            
+    def get_time_series_data(self, symbol: str, interval: str, start_date: str=None, end_date: str=None):
         if not (start_date or end_date):
             url = f"""{self.TWELVEDATA_BASE_URL}time_series?symbol={symbol.upper()}&interval={interval.lower()}&outputsize=5000&adjust=all&apikey={self.__TWELVEDATA_API_KEY}"""
         elif start_date and not end_date:
@@ -89,12 +79,6 @@ class Loader:
 
     # Returns a python object of commodities data (excluding silver and gold)
     def get_commodities_data(self, commodity_type, interval):
-        if commodity_type.upper() not in self.VALID_COMMODITIES_INTERVALS:
-            raise ValueError(f"Unsupported Commodity Type: {commodity_type}")
-
-        if (interval.lower() not in self.VALID_COMMODITIES_INTERVALS[commodity_type.upper()]):
-            raise ValueError(f"Unsupported Interval: {interval.lower()} for {commodity_type.upper()}")
-
         url = f"""{self.ALPHAVANTAGE_BASE_URL}function={commodity_type.upper()}&interval={interval.lower()}&apikey={self.__ALPHAVANTAGE_API_KEY}"""
         return self._call_api(url)
     
