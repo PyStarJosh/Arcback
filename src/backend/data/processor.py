@@ -172,7 +172,7 @@ class Processor:
             ]
         )
         commodity_df['date'] = pd.to_datetime(commodity_df['date'])
-        commodity_df = commodity_df.set_index('date',)
+        commodity_df = commodity_df.set_index('date')
         return commodity_df
     
     def _format_last_updated_data(self, dates_tuple):
