@@ -69,16 +69,18 @@ class TestLoader():
         response_dict = {"values": [{"close": "4788.09918"}]}
         with patch.object(loader, '_call_api', return_value=response_dict):
             result = loader.get_time_series_data('AAPL', '1day')
-            assert result == response_dict
+        
+        assert result == response_dict
             
     def test_get_commodities_data(self, loader):
         response_dict = {"values": [{"price": "234.09918"}]}
         with patch.object(loader, '_call_api', return_value=response_dict):
             result = loader.get_commodities_data('wheat', 'daily')
-            assert result == response_dict
+            
+        assert result == response_dict
             
     def test_get_supported_symbols(self, loader):
         response_dict = {'symbols': ['AAPL', 'Tesla', 'NVDA', 'META']}
         with patch.object(loader, '_call_api', return_value=response_dict):
             result = loader.get_supported_symbols('stocks')
-            assert result == response_dict
+        assert result == response_dict
