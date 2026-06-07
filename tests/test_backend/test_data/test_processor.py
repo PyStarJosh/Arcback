@@ -2,7 +2,6 @@ import pytest
 import pandas as pd
 import sqlite3
 from unittest.mock import patch, MagicMock
-from .conftest import processor
 
 class TestProcessor:
     """A class to test Processor class."""
