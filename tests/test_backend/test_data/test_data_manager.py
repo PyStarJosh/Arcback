@@ -56,3 +56,24 @@ class TestDataManager:
             result = data_manager.get_formatted_time_series_data('AAPL', '1day')
             
         assert result == response_dict
+        
+    def test_get_formatted_time_series_data_with_start_and_end_date_fetch(self, data_manager):
+        dates_dict = {
+            'start_date': '2020-01-01',
+            'last_date': '2020-01-02'
+        }
+        response_dict = {'values': [{'close': '283.3424'}]}
+        data_manager.loader.get_time_series_data.return_value = response_dict
+        data_manager.processor.populate_time_series_data_table.return_value = None
+        data_manager.processor.get_time_series_data.return_value = response_dict
+        with patch.object(data_manager, '_get_missing_range', return_value=(True, None, None)):
+            result = data_manager.get_formatted_time_series_data('AAPL', '1day', None, None)
+        
+        assert result == response_dict
+        
+    def test_get_formatted_commodities_data(self, data_manager):
+        response_dict = {'values': [{'price': '123.243'}]}
+        data_manager.loader.get_commodities_data.return_value = response_dict
+        data_manager.processor.populate_commodities_prices_table.return_value = None
+        result = data_manager.processor.get_commodity_data.return_value = response_dict
+        assert result == response_dict
