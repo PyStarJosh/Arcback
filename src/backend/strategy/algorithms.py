@@ -8,8 +8,8 @@ class Algorithms:
     def ma_crossover(price_data: pd.Series, dt_series: pd.Series, short_period: int, long_period: int) -> pd.DataFrame:
         result = pd.DataFrame(
             {
-                'ema_short': Indicators.ema(price_data, short_period),
-                'sma_long': Indicators.sma(price_data, long_period),
+                'ema_short': Indicators.ema(price_data, short_period).values,
+                'sma_long': Indicators.sma(price_data, long_period).values,
                 'signal': 0,
             }, index=dt_series
         )
