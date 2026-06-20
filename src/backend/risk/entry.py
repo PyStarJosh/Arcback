@@ -1,5 +1,4 @@
 import pandas as pd
-from dataclasses import dataclass
     
 class Entry:
     '''Executes trade entry based on configured entry criteria'''
