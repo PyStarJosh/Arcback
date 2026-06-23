@@ -15,7 +15,7 @@ class Engine:
         if self.asset_type == 'tseries':
             self.price_data_df = self.data_manager.get_formatted_time_series_data(symbol, interval, start_date, end_date)
         else:
-            self.price_data_df = self.data_manager.get_formatted_time_series_data(commodity_type, interval)
+            self.price_data_df = self.data_manager.get_formatted_commodities_data(commodity_type, interval)
 
         self.portfolio = Portfolio(initial_equity, self.price_data_df.index)
     
@@ -28,9 +28,9 @@ class Engine:
             
             if signal != 0:
                 if self.asset_type == 'tseries':
-                    self._open_position(risk_pct, price_row, signal, atr, atr_multiplier, symbol_column_name='symbol',price_column_name='close')
+                    self._open_position(risk_pct, price_row, signal, atr=atr, atr_multiplier=atr_multiplier, symbol_column_name='symbol', price_column_name='close')
                 else:
-                    self._open_position(risk_pct, price_row, signal, atr, atr_multiplier, symbol_column_name='commodity_type',price_column_name='price')
+                    self._open_position(risk_pct, price_row, signal, atr=atr, atr_multiplier=atr_multiplier, symbol_column_name='commodity_type', price_column_name='price')
 
 
             for record in self._pos_records:
