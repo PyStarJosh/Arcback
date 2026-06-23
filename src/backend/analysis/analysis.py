@@ -63,7 +63,7 @@ class Analysis:
         return round(self.final_pos_df[self.final_pos_df['pnl'] < 0]['pnl'].mean(), 2)
 
     def risk_reward_ratio(self) -> float:
-        return round(self.avg_win() / self.avg_loss(), 2)
+        return round(self.avg_win() / abs(self.avg_loss()), 2)
     
     def profit_factor(self) -> float:
         return self.gross_revenue() / abs(self.total_losses())
@@ -79,6 +79,8 @@ class Analysis:
         excess_returns = daily_returns - risk_free_rate / 252
         return (excess_returns.mean() / excess_returns.std()) * (252 ** 0.5)
     
-    def avg_trade_duration(self) -> int:
+    def avg_trade_duration(self) -> float:
+        '''Average holding period of closed trades, expressed in days.'''
         closed = self.final_pos_df[self.final_pos_df['status'] == 'closed']
-        return (closed['exit_price'] - closed['entry_price']).mean()
+        durations = closed['exit_time'] - closed['entry_time']
+        return round(durations.mean() / pd.Timedelta(days=1), 2)
