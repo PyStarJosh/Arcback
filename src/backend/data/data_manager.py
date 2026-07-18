@@ -40,6 +40,8 @@ class DataManager:
     # HELPER METHODS
     
     def _get_missing_range(self, stored_start_date, stored_last_date, start_date, end_date):
+        if start_date is None and end_date is None:
+            return False, None, None
         if stored_start_date <= start_date and end_date <= stored_last_date:
             return False, None, None
         elif (stored_start_date <= start_date) and (end_date > stored_last_date):

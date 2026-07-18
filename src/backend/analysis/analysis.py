@@ -2,6 +2,7 @@
 meaningful data to the frontend
 """
 import pandas as pd
+import numpy as np
 from dataclasses import dataclass
 
 @dataclass
@@ -11,7 +12,7 @@ class Analysis:
     final_equity_df: pd.DataFrame
     
     def final_equity(self) -> float:
-        return round(self.final_equity_df.iat[-1, 0], 2)
+        return round(self.final_equity_df.iat[-1,0], 2)
     
     def lowest_equity(self) -> float:
         return round(self.final_equity_df['price'].min(), 2)
@@ -46,7 +47,10 @@ class Analysis:
        
     def num_of_positions(self) -> int:
         return len(self.final_pos_df)
-    
+
+    def num_of_closed_trades(self) -> int:
+        return len(self.final_pos_df[self.final_pos_df['status'] == 'closed'])
+
     def num_of_buys(self) -> int:
         return len(self.final_pos_df[self.final_pos_df['side'] == 1])
     
@@ -54,7 +58,8 @@ class Analysis:
         return len(self.final_pos_df[self.final_pos_df['side'] == -1])
     
     def win_percentage(self) -> float:
-        return round(self.num_of_winners() / self.num_of_positions(), 2)
+        closed = self.num_of_closed_trades()
+        return round(self.num_of_winners() / closed, 2) if closed else 0.0
     
     def avg_win(self) -> float:
         return round(self.final_pos_df[self.final_pos_df['pnl'] > 0]['pnl'].mean(), 2)

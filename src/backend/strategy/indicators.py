@@ -4,6 +4,14 @@ class Indicators:
     """Houses all available indicators"""
     
     @staticmethod
+    def atr(high: pd.Series, low: pd.Series, close: pd.Series, period: int) -> pd.Series:
+        prev_close = close.shift(1)
+        tr = pd.concat([high - low,
+                       (high - prev_close).abs(),
+                       (low - prev_close).abs()], axis=1).max(axis=1)
+        return tr.rolling(window=period).mean()
+    
+    @staticmethod
     # Takes price_data['close'] value and creating a rolling array of window period and calculates the mean
     def sma(price_data: pd.Series, period: int) -> pd.Series:
         return price_data.rolling(window=period).mean()
