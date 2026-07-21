@@ -2,7 +2,7 @@
 
 Arcback is a backtesting framework (in active development) for evaluating trading indicators and algorithms against historical financial market data. The end goal is to deliver detailed performance reports across stocks, forex, cryptocurrencies, and commodities.
 
-> **Status:** Early-stage. The data ingestion and persistence layer is functional. The backtesting engine, strategy interface, portfolio, risk, and analysis modules are scaffolded but not yet implemented.
+> **Status:** Backend complete. The full backtesting pipeline — data ingestion, strategy signals, the event-driven engine, portfolio accounting, risk management, and performance analysis — is implemented and covered by a pytest suite. The frontend is the next phase.
 
 ---
 
@@ -20,24 +20,30 @@ Arcback is a backtesting framework (in active development) for evaluating tradin
   - Auto-initialized schema with three tables: `time_series_data`, `commodity_prices`, `last_updated`
   - Composite primary keys to prevent duplicate rows (`INSERT OR IGNORE`)
   - Context manager support for safe connection handling
-  - Formatted output as lists of dicts ready for downstream processing
+  - Formatted output as pandas DataFrames ready for downstream processing
 - **Interval-aware caching** via the [`DataManager`](src/backend/data/data_manager.py) coordinator
   - Tracks the date range already cached per `(symbol, interval)` pair in the `last_updated` table
   - Computes the missing date range and only fetches what isn't already in the local DB, minimizing redundant API calls
+- **Strategy & indicators** via [`Algorithms`](src/backend/strategy/algorithms.py) and [`Indicators`](src/backend/strategy/indicators.py)
+  - Indicator library (SMA, EMA, ATR, …) and a moving-average-crossover strategy that emits `1` / `-1` / `0` entry signals
+- **Event-driven backtest engine** via the [`Engine`](src/backend/engine/engine.py) class
+  - Bar-by-bar simulation over historical data for both time-series and commodity assets
+  - Opens positions on entry signals, tracks open trades, and closes them on exit signals — returning populated positions and equity DataFrames
+  - Positions modeled by the [`Positions`](src/backend/engine/positions.py) dataclass
+- **Portfolio accounting** via the [`Portfolio`](src/backend/portfolio/portfolio.py) class — equity tracking and per-trade PnL adjustment across the backtest timeline
+- **Risk management** via [`Entry`](src/backend/risk/entry.py), [`Exits`](src/backend/risk/exits.py), and [`Sizing`](src/backend/risk/sizing.py)
+  - Volatility-targeted position sizing (risk-% + ATR multiplier)
+  - ATR-based stop-loss / take-profit levels and exit checks
+- **Performance analysis** via the [`Analysis`](src/backend/analysis/analysis.py) class
+  - Final / high / low equity, gross & net revenue, equity % change
+  - Win percentage, profit factor, risk/reward ratio, avg win/loss, winners/losers counts
+  - Max drawdown, Sharpe ratio, average trade duration
 - **Environment-based API key management** via [`Constants`](src/backend/constants.py) using `python-dotenv`
-- **Configured root logger** in [`main.py`](main.py) so submodules inherit a consistent logging format
+- **Test suite** — pytest coverage for every backend module under [`tests/test_backend/`](tests/test_backend/) (data, strategy, risk, engine, portfolio, analysis)
 
-### Planned / Scaffolded
+### Next phase
 
-The following packages exist as empty modules under [`src/backend/`](src/backend/) and are next on the roadmap:
-
-| Module | Purpose |
-|---|---|
-| [`engine/`](src/backend/engine/) | Core backtest event loop — bar-by-bar simulation over historical data |
-| [`strategy/`](src/backend/strategy/) | Strategy/indicator interface that emits signals from market data |
-| [`portfolio/`](src/backend/portfolio/) | Position tracking, order execution, cash and equity accounting |
-| [`risk/`](src/backend/risk/) | Position sizing, stop-loss / take-profit, exposure limits |
-| [`analysis/`](src/backend/analysis/) | Performance metrics (Sharpe, drawdown, win rate, etc.) and report generation |
+- **Frontend** — a web UI under [`src/frontend/`](src/frontend/) to configure backtests and visualize results (currently just `index.html`)
 
 ---
 
@@ -45,22 +51,34 @@ The following packages exist as empty modules under [`src/backend/`](src/backend
 
 ```
 Arcback/
-├── main.py                         # Entry point + logging config
 ├── requirements.txt
 ├── .env.example                    # Template for required API keys
 ├── reference_data/                 # Sample API response payloads (gitignored)
+├── tests/
+│   └── test_backend/               # pytest suite mirroring src/backend/
 └── src/
-    └── backend/
-        ├── constants.py            # API key loader (uses python-dotenv)
-        ├── data/
-        │   ├── loader.py           # Twelve Data + Alpha Vantage HTTP client
-        │   ├── processor.py        # SQLite schema, inserts, queries
-        │   └── data_manager.py     # Coordinates loader + processor with caching
-        ├── engine/                 # (planned)
-        ├── strategy/               # (planned)
-        ├── portfolio/              # (planned)
-        ├── risk/                   # (planned)
-        └── analysis/               # (planned)
+    ├── backend/
+    │   ├── constants.py            # API key loader (uses python-dotenv)
+    │   ├── data/
+    │   │   ├── loader.py           # Twelve Data + Alpha Vantage HTTP client
+    │   │   ├── processor.py        # SQLite schema, inserts, queries
+    │   │   └── data_manager.py     # Coordinates loader + processor with caching
+    │   ├── strategy/
+    │   │   ├── indicators.py       # SMA, EMA, ATR, …
+    │   │   └── algorithms.py       # Signal-emitting strategies (MA crossover)
+    │   ├── engine/
+    │   │   ├── engine.py           # Event-driven bar-by-bar backtest loop
+    │   │   └── positions.py        # Position dataclass
+    │   ├── portfolio/
+    │   │   └── portfolio.py        # Equity + PnL accounting
+    │   ├── risk/
+    │   │   ├── entry.py            # Entry checks, SL/TP levels
+    │   │   ├── exits.py            # Exit checks
+    │   │   └── sizing.py           # Volatility-targeted position sizing
+    │   └── analysis/
+    │       └── analysis.py         # Performance metrics
+    └── frontend/                   # (next phase)
+        └── index.html
 ```
 
 ---
@@ -107,61 +125,44 @@ TWELVE_DATA_API_KEY=your_API_key_here
 
 ## Usage
 
-> A CLI / runner is not yet wired up — the data layer is currently exercised programmatically.
+> A CLI / configuration-driven runner and the frontend are not yet wired up; the backend is currently used programmatically.
 
-### Fetching and caching time series data
+### Running a full backtest
 
 ```python
-from src.backend.data.data_manager import DataManager
+from src.backend import DataManager, Algorithms, Engine, Analysis
 
+# 1. Fetch, process, and cache market data
 with DataManager() as dm:
-    # Stocks, forex, or crypto via Twelve Data
-    aapl = dm.get_formatted_time_series_data(
-        symbol="AAPL",
-        interval="1day",
-        start_date="2024-01-01",
-        end_date="2024-12-31",
-    )
-    for row in aapl[:5]:
-        print(row)
+    df = dm.get_formatted_time_series_data(symbol="NVDA", interval="1day")
+
+# 2. Generate entry signals from a strategy
+signals = Algorithms.ma_crossover(
+    price_data=df["close"], dt_series=df.index, short_period=12, long_period=20
+)
+
+# 3. Run the event-driven backtest
+engine = Engine(initial_equity=100_000.00, asset_type="tseries", interval="1day", symbol="NVDA")
+positions_df, equity_df = engine.trade_entry_execution(
+    signal_df=signals, risk_pct=0.01, atr_multiplier=2
+)
+
+# 4. Analyze results
+analysis = Analysis(final_pos_df=positions_df, final_equity_df=equity_df)
+print(analysis.final_equity(), analysis.net_revenue(), analysis.win_percentage())
+print(analysis.drawdown(), analysis.sharpe_ratio(), analysis.profit_factor())
 ```
 
-The first call hits the API and populates the SQLite DB. Subsequent calls covering the same range are served entirely from the local cache; calls extending the range only fetch the missing window.
+The first data fetch hits the API and populates the SQLite DB. Subsequent calls covering the same range are served entirely from the local cache; calls extending the range only fetch the missing window.
 
 ### Fetching commodities data
 
 ```python
-from src.backend.data.data_manager import DataManager
+from src.backend import DataManager
 
 with DataManager() as dm:
     wti = dm.get_formatted_commodities_data(commodity_type="WTI", interval="daily")
-    print(wti[:5])
-```
-
-### Output shape
-
-**Time series row:**
-```python
-{
-    "symbol": "AAPL",
-    "interval": "1day",
-    "datetime": "2024-12-31",
-    "open": 252.10,
-    "high": 253.28,
-    "low": 249.43,
-    "close": 250.42,
-    "volume": 39480718,
-}
-```
-
-**Commodity row:**
-```python
-{
-    "interval": "daily",
-    "commodity_type": "WTI",
-    "date": "2024-12-31",
-    "price": 71.72,
-}
+    print(wti.head())
 ```
 
 ---
@@ -200,8 +201,8 @@ The DB file is gitignored.
 - **HTTP:** `requests`
 - **Storage:** `sqlite3` (stdlib)
 - **Config:** `python-dotenv`
-- **Numerics / data (declared, not yet wired up):** `numpy`, `pandas`
-- **Plotting (planned for analysis module):** `matplotlib`
+- **Numerics / data:** `numpy`, `pandas`
+- **Testing:** `pytest`
 - **Tooling:** `black` for formatting
 
 ---
@@ -212,13 +213,14 @@ The DB file is gitignored.
 - [x] Alpha Vantage integration (commodities)
 - [x] SQLite persistence with composite primary keys
 - [x] Interval-aware caching to skip redundant API calls
-- [ ] Strategy / indicator interface
-- [ ] Event-driven backtest engine
-- [ ] Portfolio and order management
-- [ ] Risk management (sizing, stops, exposure)
-- [ ] Performance analysis and report generation
+- [x] Strategy / indicator interface
+- [x] Event-driven backtest engine
+- [x] Portfolio and order management
+- [x] Risk management (sizing, stops, exposure)
+- [x] Performance analysis
+- [x] Backend test suite (pytest)
+- [ ] Frontend UI for configuring backtests and visualizing results
 - [ ] CLI / configuration-driven runs
-- [ ] Unit + integration tests
 
 ---
 
