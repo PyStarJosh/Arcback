@@ -18,16 +18,94 @@
             justify-content: space-between;
             align-items: baseline;
         }
+
+        .footer {
+            text-align: center;
+            align-items: end;
+            justify-content: end;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #df2d2d;
+            color: #FFFF;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .calculator {
+            display: flex;
+            gap: 24px;
+            max-width: 900px;
+            margin: 40px;
+            padding: 24px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+
+        }
+
+        .config, .results {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .config {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .config label {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+
+        .run-btn {
+            background: #df2d2d;
+            color: #FFFF;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
         <h1>Arcback</h1>
-        <p>Sign In</p>
+        <a href="sign_in.html" class="btn">
+            <p><b>Sign In</b></p>
+        </a>
+            
     </div>
     <hr>
     <h2>Trading Algo/Indicator Backtester</h2>
+    <div class="calculator">
+        <!-- LEFT: the inputs -->
+        <form class="config">
+            <label> Equity <input type="text" name="equity"> </label>
+            <label> Symbol <input type="text" name="symbol"> </label>
+            <label> Interval <input type="text" name="interval"> </label>
+            <label> Start Date <input type="date" name="start"> </label>
+            <label> End Date <input type="date" name="end"> </label>
+            <label> Entry/Exit Indicator <input type="text" name="indicators"> </label>
+            <button type="submit" class="run-btn">Run Backtest</button>
+        </form>
+
+        <!-- RIGHT: the results -->
+         <section class="results">
+            <h2>Results</h2>
+            <!-- metrics + equity curve chart go here-->
+         </section>
+    </div>
 </body>
 
 </html>
