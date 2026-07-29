@@ -31,7 +31,7 @@ class Analysis:
         
     def equity_pct_change(self) -> float:
         initial_equity = round(self.final_equity_df.iat[0, 0], 2)
-        return (self.final_equity() - initial_equity) / initial_equity * 100
+        return round((self.final_equity() - initial_equity) / initial_equity * 100, 2)
     
     def num_of_winners(self) -> int:
         return len(self.final_pos_df[self.final_pos_df['pnl'] > 0])
@@ -71,7 +71,7 @@ class Analysis:
         return round(self.avg_win() / abs(self.avg_loss()), 2)
     
     def profit_factor(self) -> float:
-        return self.gross_revenue() / abs(self.total_losses())
+        return round(self.gross_revenue() / abs(self.total_losses()), 2)
     
     def drawdown(self) -> float:
         price = self.final_equity_df['price']
@@ -82,7 +82,7 @@ class Analysis:
     def sharpe_ratio(self, risk_free_rate: float = 0.0) -> float:
         daily_returns = self.final_equity_df['price'].pct_change().dropna()
         excess_returns = daily_returns - risk_free_rate / 252
-        return (excess_returns.mean() / excess_returns.std()) * (252 ** 0.5)
+        return round((excess_returns.mean() / excess_returns.std()) * (252 ** 0.5), 2)
     
     def avg_trade_duration(self) -> float:
         '''Average holding period of closed trades, expressed in days.'''
